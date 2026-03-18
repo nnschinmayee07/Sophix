@@ -233,6 +233,19 @@ body {
 .mt-2 { margin-top: 10px; }
 .mt-8 { margin-top: 32px; }
 
+/* Admin login */
+.admin-login {
+  display: flex; justify-content: center; align-items: center; min-height: 70vh;
+}
+.admin-login-card {
+  background: var(--card); border: 1px solid var(--border);
+  padding: 40px; border-radius: 20px; width: 100%; max-width: 380px;
+  text-align: center;
+}
+.admin-lock-icon { font-size: 48px; margin-bottom: 16px; }
+.admin-login-card h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+.error-msg { color: var(--danger); font-size: 13px; margin-top: 8px; }
+
 /* Responsive */
 @media (max-width: 768px) {
   .stat-cards { grid-template-columns: repeat(2, 1fr); }

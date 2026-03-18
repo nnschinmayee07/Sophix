@@ -79,7 +79,6 @@ export default function Participants() {
                 <motion.div key={ev.id} className="event-card" whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
                   <div className="event-card-header">
                     <h3 className="event-card-title">{ev.name}</h3>
-                    <span className="pill">👥 {ev.attendees} enrolled</span>
                   </div>
                   {ev.description && <p className="event-desc">{ev.description}</p>}
                   <div className="event-meta">
@@ -120,32 +119,6 @@ export default function Participants() {
               </div>
             </form>
           </div>
-
-          {/* Participants List */}
-          <div className="section-header">
-            <h2>Enrolled Participants</h2>
-            <span className="badge">{filteredParticipants.length}</span>
-          </div>
-          <div className="filter-bar">
-            <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All</button>
-            {events.map(e => (
-              <button key={e.id} className={`filter-btn ${filter === e.name ? 'active' : ''}`} onClick={() => setFilter(e.name)}>
-                {e.name}
-              </button>
-            ))}
-          </div>
-          <AnimatePresence>
-            {filteredParticipants.map(p => (
-              <motion.div key={p.id} className="participant-item" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
-                <div className="participant-avatar">{p.name[0].toUpperCase()}</div>
-                <div>
-                  <strong>{p.name}</strong>
-                  <p className="muted small">{p.email}</p>
-                </div>
-                <span className="pill" style={{ marginLeft: 'auto' }}>{p.event}</span>
-              </motion.div>
-            ))}
-          </AnimatePresence>
 
         </motion.div>
       </main>
