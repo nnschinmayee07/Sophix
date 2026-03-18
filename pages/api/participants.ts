@@ -9,11 +9,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === 'POST') {
     const { name, email, event } = req.body
-    if (!name || !email || !event) return res.status(400).json({ error: 'All fields required' })
+    if (!name || !email || !event) return res.status(400).json({ error: 'All fields Required' })
     const [row] = await sql`
       INSERT INTO participants (name, email, event)
       VALUES (${name}, ${email}, ${event})
       RETURNING *`
+    // increment attendees count on the matching event
+    await sql`UPDATE events SET attendees = attendees + 1 WHERE name = ${event}`
     return res.status(201).json(row)
   }
 

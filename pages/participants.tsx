@@ -2,27 +2,31 @@ import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const HACKATHONS = [
-  { id: 'h1', name: 'AI Hackathon', desc: 'Build with AI & ML', date: '2025-10-01' },
-  { id: 'h2', name: 'Web3 Jam', desc: 'Blockchain builders unite', date: '2025-11-12' },
-  { id: 'h3', name: 'GreenTech Challenge', desc: 'Sustainable tech innovation', date: '2025-12-05' },
-]
-
 type Participant = { id: string; name: string; email: string; event: string }
+type Event = { id: string; name: string }
 
 export default function Participants() {
   const [participants, setParticipants] = useState<Participant[]>([])
+  const [events, setEvents] = useState<Event[]>([])
   const [form, setForm] = useState({ name: '', email: '', event: '' })
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { fetchParticipants() }, [])
+  useEffect(() => {
+    fetchParticipants()
+    fetchEvents()
+  }, [])
 
   async function fetchParticipants() {
     setLoading(true)
     const res = await fetch('/api/participants')
     if (res.ok) setParticipants(await res.json())
     setLoading(false)
+  }
+
+  async function fetchEvents() {
+    const res = await fetch('/api/events')
+    if (res.ok) setEvents(await res.json())
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -55,47 +59,53 @@ export default function Participants() {
       <Header />
       <main className="container">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <section className="participants">
-          <h1>Enroll as Participant</h1>
-          {success && <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}><div className="toast success">{success}</div></motion.div>}
-          <form className="create-form" onSubmit={enroll} aria-label="Enroll form">
-            <div className="form-row"><label>Name</label><input name="name" value={form.name} onChange={handleChange} required /></div>
-            <div className="form-row"><label>Email</label><input name="email" type="email" value={form.email} onChange={handleChange} required /></div>
-            <div className="form-row">
-              <label>Event</label>
-              <select name="event" value={form.event} onChange={handleChange} required>
-                <option value="">Select an event</option>
-                {HACKATHONS.map(h => <option key={h.id} value={h.name}>{h.name} — {h.date}</option>)}
-              </select>
-            </div>
-            <div className="form-actions"><button className="btn btn-primary" type="submit">Enroll</button></div>
-          </form>
-
-          <h2 className="mt-8">Browse Hackathons</h2>
-          <div className="hackathon-grid">
-            {HACKATHONS.map(h => (
-              <div key={h.id} className="hackathon-card">
-                <h3>{h.name}</h3>
-                <p className="muted">{h.desc}</p>
-                <p className="muted">Date: {h.date}</p>
-                <button className="btn btn-primary mt-2" onClick={() => setForm(f => ({ ...f, event: h.name }))}>Enroll</button>
+          <section className="participants">
+            <h1>Enroll as Participant</h1>
+            {success && (
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+                <div className="toast success">{success}</div>
+              </motion.div>
+            )}
+            <form className="create-form" onSubmit={enroll} aria-label="Enroll form">
+              <div className="form-row"><label>Name</label><input name="name" value={form.name} onChange={handleChange} required /></div>
+              <div className="form-row"><label>Email</label><input name="email" type="email" value={form.email} onChange={handleChange} required /></div>
+              <div className="form-row">
+                <label>Event</label>
+                <select name="event" value={form.event} onChange={handleChange} required>
+                  <option value="">Select an event</option>
+                  {events.map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
+                </select>
               </div>
-            ))}
-          </div>
+              <div className="form-actions"><button className="btn btn-primary" type="submit">Enroll</button></div>
+            </form>
 
-          <h2 className="mt-8">Enrolled Participants</h2>
-          {loading ? <p className="muted">Loading...</p> : (
-            <AnimatePresence>
-              {participants.map(p => (
-                <motion.div key={p.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
-                  <div className="participant-item">
-                    <strong>{p.name}</strong> — {p.email} → <span className="muted">{p.event}</span>
+            <h2 className="mt-8">Browse Events</h2>
+            {events.length === 0 ? (
+              <p className="muted">No events yet. Create one from the Dashboard!</p>
+            ) : (
+              <div className="hackathon-grid">
+                {events.map(e => (
+                  <div key={e.id} className="hackathon-card">
+                    <h3>{e.name}</h3>
+                    <button className="btn btn-primary mt-2" onClick={() => setForm(f => ({ ...f, event: e.name }))}>Enroll</button>
                   </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+
+            <h2 className="mt-8">Enrolled Participants</h2>
+            {loading ? <p className="muted">Loading...</p> : (
+              <AnimatePresence>
+                {participants.map(p => (
+                  <motion.div key={p.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
+                    <div className="participant-item">
+                      <strong>{p.name}</strong> — {p.email} → <span className="muted">{p.event}</span>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
+          </section>
         </motion.div>
       </main>
     </div>
