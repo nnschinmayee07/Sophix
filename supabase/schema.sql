@@ -1,25 +1,29 @@
--- Run this in your Supabase SQL editor
+-- Run this in your Neon SQL editor to upgrade the schema
 
-create table events (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  attendees integer default 0,
-  engagement integer default 0,
-  created_at timestamptz default now()
-);
+-- Add new columns to events (safe to run even if table exists)
+ALTER TABLE events ADD COLUMN IF NOT EXISTS description text default '';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS location text default '';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS event_date text default '';
 
-create table participants (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  email text not null,
-  event text not null,
-  created_at timestamptz default now()
-);
+-- Recreate events from scratch if you prefer a clean slate:
+-- DROP TABLE IF EXISTS participants;
+-- DROP TABLE IF EXISTS events;
 
--- Enable Row Level Security (optional but recommended)
-alter table events enable row level security;
-alter table participants enable row level security;
+-- create table events (
+--   id uuid primary key default gen_random_uuid(),
+--   name text not null,
+--   description text default '',
+--   location text default '',
+--   event_date text default '',
+--   attendees integer default 0,
+--   engagement integer default 0,
+--   created_at timestamptz default now()
+-- );
 
--- Allow public read/write for now (tighten later with auth)
-create policy "Allow all" on events for all using (true) with check (true);
-create policy "Allow all" on participants for all using (true) with check (true);
+-- create table participants (
+--   id uuid primary key default gen_random_uuid(),
+--   name text not null,
+--   email text not null,
+--   event text not null,
+--   created_at timestamptz default now()
+-- );

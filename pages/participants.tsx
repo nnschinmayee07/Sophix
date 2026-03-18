@@ -3,7 +3,7 @@ import Header from '../components/Header'
 import { motion, AnimatePresence } from 'framer-motion'
 
 type Participant = { id: string; name: string; email: string; event: string }
-type Event = { id: string; name: string }
+type Event = { id: string; name: string; description: string; location: string; event_date: string; attendees: number }
 
 export default function Participants() {
   const [participants, setParticipants] = useState<Participant[]>([])
@@ -11,22 +11,18 @@ export default function Participants() {
   const [form, setForm] = useState({ name: '', email: '', event: '' })
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('all')
 
   useEffect(() => {
-    fetchParticipants()
-    fetchEvents()
+    fetchAll()
   }, [])
 
-  async function fetchParticipants() {
+  async function fetchAll() {
     setLoading(true)
-    const res = await fetch('/api/participants')
-    if (res.ok) setParticipants(await res.json())
+    const [evRes, parRes] = await Promise.all([fetch('/api/events'), fetch('/api/participants')])
+    if (evRes.ok) setEvents(await evRes.json())
+    if (parRes.ok) setParticipants(await parRes.json())
     setLoading(false)
-  }
-
-  async function fetchEvents() {
-    const res = await fetch('/api/events')
-    if (res.ok) setEvents(await res.json())
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -46,66 +42,111 @@ export default function Participants() {
       const p = await res.json()
       setParticipants(prev => [p, ...prev])
       setForm({ name: '', email: '', event: '' })
-      setSuccess('Enrolled successfully!')
-      setTimeout(() => setSuccess(''), 2500)
+      setSuccess(`You're enrolled in ${form.event}!`)
+      setTimeout(() => setSuccess(''), 3000)
     } else {
       const { error } = await res.json()
       alert(error || 'Enrollment failed')
     }
   }
 
+  const filteredParticipants = filter === 'all' ? participants : participants.filter(p => p.event === filter)
+
   return (
     <div className="page">
       <Header />
       <main className="container">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <section className="participants">
-            <h1>Enroll as Participant</h1>
-            {success && (
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                <div className="toast success">{success}</div>
-              </motion.div>
-            )}
-            <form className="create-form" onSubmit={enroll} aria-label="Enroll form">
-              <div className="form-row"><label>Name</label><input name="name" value={form.name} onChange={handleChange} required /></div>
-              <div className="form-row"><label>Email</label><input name="email" type="email" value={form.email} onChange={handleChange} required /></div>
-              <div className="form-row">
-                <label>Event</label>
-                <select name="event" value={form.event} onChange={handleChange} required>
-                  <option value="">Select an event</option>
-                  {events.map(e => <option key={e.id} value={e.name}>{e.name}</option>)}
-                </select>
-              </div>
-              <div className="form-actions"><button className="btn btn-primary" type="submit">Enroll</button></div>
-            </form>
 
-            <h2 className="mt-8">Browse Events</h2>
-            {events.length === 0 ? (
-              <p className="muted">No events yet. Create one from the Dashboard!</p>
-            ) : (
-              <div className="hackathon-grid">
-                {events.map(e => (
-                  <div key={e.id} className="hackathon-card">
-                    <h3>{e.name}</h3>
-                    <button className="btn btn-primary mt-2" onClick={() => setForm(f => ({ ...f, event: e.name }))}>Enroll</button>
+          {success && (
+            <motion.div className="toast success" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+              ✅ {success}
+            </motion.div>
+          )}
+
+          <div className="page-hero">
+            <h1 className="gradient-text">Find Your Event</h1>
+            <p className="muted big-subtext">Browse events and enroll in seconds.</p>
+          </div>
+
+          {/* Events Grid */}
+          <h2 className="section-title">Available Events</h2>
+          {loading ? <p className="muted">Loading events...</p> : events.length === 0 ? (
+            <div className="empty-state"><p>No events available yet. Check back soon!</p></div>
+          ) : (
+            <div className="event-cards">
+              {events.map(ev => (
+                <motion.div key={ev.id} className="event-card" whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+                  <div className="event-card-header">
+                    <h3 className="event-card-title">{ev.name}</h3>
+                    <span className="pill">👥 {ev.attendees} enrolled</span>
                   </div>
-                ))}
-              </div>
-            )}
+                  {ev.description && <p className="event-desc">{ev.description}</p>}
+                  <div className="event-meta">
+                    {ev.event_date && <span className="muted small">📅 {ev.event_date}</span>}
+                    {ev.location && <span className="muted small">📍 {ev.location}</span>}
+                  </div>
+                  <button className="btn btn-primary mt-2" onClick={() => setForm(f => ({ ...f, event: ev.name }))}>
+                    Enroll Now
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
-            <h2 className="mt-8">Enrolled Participants</h2>
-            {loading ? <p className="muted">Loading...</p> : (
-              <AnimatePresence>
-                {participants.map(p => (
-                  <motion.div key={p.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
-                    <div className="participant-item">
-                      <strong>{p.name}</strong> — {p.email} → <span className="muted">{p.event}</span>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            )}
-          </section>
+          {/* Enroll Form */}
+          <div className="enroll-section">
+            <h2 className="section-title">Enroll as Participant</h2>
+            <form className="create-form enroll-form" onSubmit={enroll}>
+              <div className="form-grid">
+                <div className="form-row">
+                  <label>Your Name</label>
+                  <input name="name" value={form.name} onChange={handleChange} placeholder="Full name" required />
+                </div>
+                <div className="form-row">
+                  <label>Email</label>
+                  <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@email.com" required />
+                </div>
+                <div className="form-row full-width">
+                  <label>Select Event</label>
+                  <select name="event" value={form.event} onChange={handleChange} required>
+                    <option value="">Choose an event...</option>
+                    {events.map(e => <option key={e.id} value={e.name}>{e.name}{e.event_date ? ` — ${e.event_date}` : ''}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="form-actions">
+                <button className="btn btn-primary" type="submit">Confirm Enrollment</button>
+              </div>
+            </form>
+          </div>
+
+          {/* Participants List */}
+          <div className="section-header">
+            <h2>Enrolled Participants</h2>
+            <span className="badge">{filteredParticipants.length}</span>
+          </div>
+          <div className="filter-bar">
+            <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All</button>
+            {events.map(e => (
+              <button key={e.id} className={`filter-btn ${filter === e.name ? 'active' : ''}`} onClick={() => setFilter(e.name)}>
+                {e.name}
+              </button>
+            ))}
+          </div>
+          <AnimatePresence>
+            {filteredParticipants.map(p => (
+              <motion.div key={p.id} className="participant-item" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
+                <div className="participant-avatar">{p.name[0].toUpperCase()}</div>
+                <div>
+                  <strong>{p.name}</strong>
+                  <p className="muted small">{p.email}</p>
+                </div>
+                <span className="pill" style={{ marginLeft: 'auto' }}>{p.event}</span>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
         </motion.div>
       </main>
     </div>

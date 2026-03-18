@@ -8,11 +8,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'POST') {
-    const { name, attendees, engagement } = req.body
+    const { name, description, location, event_date, attendees, engagement } = req.body
     if (!name) return res.status(400).json({ error: 'Event name required' })
     const [row] = await sql`
-      INSERT INTO events (name, attendees, engagement)
-      VALUES (${name}, ${Number(attendees || 0)}, ${Number(engagement || 0)})
+      INSERT INTO events (name, description, location, event_date, attendees, engagement)
+      VALUES (${name}, ${description || ''}, ${location || ''}, ${event_date || ''}, ${Number(attendees || 0)}, ${Number(engagement || 0)})
       RETURNING *`
     return res.status(201).json(row)
   }
