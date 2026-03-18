@@ -1,52 +1,43 @@
 import Header from '../components/Header'
 import Dashboard from '../components/Dashboard'
 import { useState } from 'react'
-
-const ADMIN_PIN = process.env.NEXT_PUBLIC_ADMIN_PIN || '1234'
+import { motion } from 'framer-motion'
 
 export default function DashboardPage() {
-  const [pin, setPin] = useState('')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [authed, setAuthed] = useState(false)
-  const [error, setError] = useState('')
 
   const login = (e: React.FormEvent) => {
     e.preventDefault()
-    if (pin === ADMIN_PIN) {
-      setAuthed(true)
-      setError('')
-    } else {
-      setError('Incorrect PIN. Try again.')
-    }
+    if (username.trim() && password.trim()) setAuthed(true)
   }
 
   if (!authed) {
     return (
       <div className="page">
-        <Header />
+        <Header adminMode />
         <main className="container">
-          <div className="admin-login">
+          <motion.div className="admin-login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="admin-login-card">
               <div className="admin-lock-icon">🔐</div>
-              <h2>Admin Access</h2>
-              <p className="muted">Enter your admin PIN to continue</p>
+              <h2>Admin Login</h2>
+              <p className="muted">Enter any credentials to continue</p>
               <form onSubmit={login}>
                 <div className="form-row" style={{ marginTop: 20 }}>
-                  <label>Admin PIN</label>
-                  <input
-                    type="password"
-                    value={pin}
-                    onChange={e => setPin(e.target.value)}
-                    placeholder="Enter PIN"
-                    autoFocus
-                  />
+                  <label>Username</label>
+                  <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Enter username" autoFocus required />
                 </div>
-                {error && <p className="error-msg">{error}</p>}
-                <button className="btn btn-primary" type="submit" style={{ width: '100%', marginTop: 14, padding: '12px' }}>
+                <div className="form-row" style={{ marginTop: 12 }}>
+                  <label>Password</label>
+                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" required />
+                </div>
+                <button className="btn btn-primary" type="submit" style={{ width: '100%', marginTop: 20, padding: '12px' }}>
                   Login as Admin
                 </button>
               </form>
             </div>
-          </div>
+          </motion.div>
         </main>
       </div>
     )
@@ -54,7 +45,7 @@ export default function DashboardPage() {
 
   return (
     <div className="page">
-      <Header />
+      <Header adminMode />
       <main className="container">
         <Dashboard />
       </main>

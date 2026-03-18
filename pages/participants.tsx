@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 type Participant = { id: string; name: string; email: string; event: string }
 type Event = { id: string; name: string; description: string; location: string; event_date: string; attendees: number }
@@ -11,11 +11,8 @@ export default function Participants() {
   const [form, setForm] = useState({ name: '', email: '', event: '' })
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all')
 
-  useEffect(() => {
-    fetchAll()
-  }, [])
+  useEffect(() => { fetchAll() }, [])
 
   async function fetchAll() {
     setLoading(true)
@@ -30,6 +27,11 @@ export default function Participants() {
     setForm(f => ({ ...f, [name]: value }))
   }
 
+  const handleEnrollClick = (eventName: string) => {
+    setForm(f => ({ ...f, event: eventName }))
+    document.getElementById('enroll-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const enroll = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name || !form.email || !form.event) return alert('All fields required')
@@ -39,8 +41,7 @@ export default function Participants() {
       body: JSON.stringify(form),
     })
     if (res.ok) {
-      const p = await res.json()
-      setParticipants(prev => [p, ...prev])
+      await res.json()
       setForm({ name: '', email: '', event: '' })
       setSuccess(`You're enrolled in ${form.event}!`)
       setTimeout(() => setSuccess(''), 3000)
@@ -49,8 +50,6 @@ export default function Participants() {
       alert(error || 'Enrollment failed')
     }
   }
-
-  const filteredParticipants = filter === 'all' ? participants : participants.filter(p => p.event === filter)
 
   return (
     <div className="page">
@@ -69,7 +68,6 @@ export default function Participants() {
             <p className="muted big-subtext">Browse events and enroll in seconds.</p>
           </div>
 
-          {/* Events Grid */}
           <h2 className="section-title">Available Events</h2>
           {loading ? <p className="muted">Loading events...</p> : events.length === 0 ? (
             <div className="empty-state"><p>No events available yet. Check back soon!</p></div>
@@ -85,7 +83,7 @@ export default function Participants() {
                     {ev.event_date && <span className="muted small">📅 {ev.event_date}</span>}
                     {ev.location && <span className="muted small">📍 {ev.location}</span>}
                   </div>
-                  <button className="btn btn-primary mt-2" onClick={() => setForm(f => ({ ...f, event: ev.name }))}>
+                  <button className="btn btn-primary mt-2" onClick={() => handleEnrollClick(ev.name)}>
                     Enroll Now
                   </button>
                 </motion.div>
@@ -93,8 +91,7 @@ export default function Participants() {
             </div>
           )}
 
-          {/* Enroll Form */}
-          <div className="enroll-section">
+          <div className="enroll-section" id="enroll-form">
             <h2 className="section-title">Enroll as Participant</h2>
             <form className="create-form enroll-form" onSubmit={enroll}>
               <div className="form-grid">

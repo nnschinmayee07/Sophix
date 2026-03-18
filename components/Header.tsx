@@ -2,15 +2,27 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { motion } from 'framer-motion'
 
-export default function Header() {
+type Props = { adminMode?: boolean }
+
+export default function Header({ adminMode = false }: Props) {
   const router = useRouter()
-  const links = [
+
+  const participantLinks = [
+    { href: '/', label: 'Home' },
+    { href: '/participants', label: 'Participants' },
+    { href: '/features', label: 'Features' },
+    { href: '/community', label: 'Community' },
+  ]
+
+  const adminLinks = [
     { href: '/', label: 'Home' },
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/features', label: 'Features' },
     { href: '/community', label: 'Community' },
-    { href: '/participants', label: 'Participants' },
   ]
+
+  const links = adminMode ? adminLinks : participantLinks
+
   return (
     <header className="site-header">
       <div className="brand">Sophix<span className="accent">.</span></div>
