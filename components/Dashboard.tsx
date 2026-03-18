@@ -12,19 +12,22 @@ export default function Dashboard() {
   const [formData, setFormData] = useState({ name: '', description: '', location: '', event_date: '', attendees: '', engagement: '' })
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
-    fetchAll()
-    const interval = setInterval(fetchAll, 10000)
+    fetchAll(true)
+    const interval = setInterval(() => fetchAll(false), 5000)
     return () => clearInterval(interval)
   }, [])
 
-  async function fetchAll() {
-    setLoading(true)
+  async function fetchAll(initial = false) {
+    if (initial) setLoading(true)
+    else setRefreshing(true)
     const [evRes, parRes] = await Promise.all([fetch('/api/events'), fetch('/api/participants')])
     if (evRes.ok) setEvents(await evRes.json())
     if (parRes.ok) setParticipants(await parRes.json())
-    setLoading(false)
+    if (initial) setLoading(false)
+    else setRefreshing(false)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -69,7 +72,7 @@ export default function Dashboard() {
       <div className="admin-hero">
         <div>
           <h1 id="dashboard-heading">Admin Dashboard</h1>
-          <p className="muted">Manage your events and track enrollments</p>
+          <p className="muted">Manage your events and track enrollments {refreshing && <span className="refresh-dot">● live</span>}</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowForm(s => !s)}>
           {showForm ? '✕ Close' : '+ Create Event'}
@@ -125,7 +128,7 @@ export default function Dashboard() {
                   <XAxis dataKey="name" tick={{ fill: '#9aa4b2', fontSize: 12 }} />
                   <YAxis tick={{ fill: '#9aa4b2', fontSize: 12 }} />
                   <Tooltip contentStyle={{ background: '#0f1724', border: 'none', borderRadius: 8 }} />
-                  <Bar dataKey="attendees" name="Attendees" fill="#13a4ec" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="attendees" name="Attendees" fill="#13a4ec" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={600} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -139,7 +142,7 @@ export default function Dashboard() {
                   <XAxis dataKey="name" tick={{ fill: '#9aa4b2', fontSize: 12 }} />
                   <YAxis tick={{ fill: '#9aa4b2', fontSize: 12 }} />
                   <Tooltip contentStyle={{ background: '#0f1724', border: 'none', borderRadius: 8 }} />
-                  <Line type="monotone" dataKey="engagement" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 5 }} />
+                  <Line type="monotone" dataKey="engagement" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 5 }} isAnimationActive={true} animationDuration={600} />
                 </LineChart>
               </ResponsiveContainer>
             </div>

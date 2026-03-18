@@ -233,6 +233,10 @@ body {
 .mt-2 { margin-top: 10px; }
 .mt-8 { margin-top: 32px; }
 
+/* Refresh indicator */
+.refresh-dot { color: #22c55e; font-size: 12px; margin-left: 8px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }
+
 /* Explore / Participants page */
 .explore-hero { padding: 40px 0 24px; }
 .explore-hero h1 { font-size: 2.8rem; font-weight: 900; letter-spacing: -1px; }
