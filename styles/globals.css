@@ -233,6 +233,29 @@ body {
 .mt-2 { margin-top: 10px; }
 .mt-8 { margin-top: 32px; }
 
+/* Explore / Participants page */
+.explore-hero { padding: 40px 0 24px; }
+.explore-hero h1 { font-size: 2.8rem; font-weight: 900; letter-spacing: -1px; }
+.enroll-section { margin: 48px 0 40px; padding-top: 16px; border-top: 1px solid var(--border); }
+.enroll-header { margin-bottom: 20px; }
+.enroll-header h2 { font-size: 1.4rem; font-weight: 700; }
+.enroll-form { max-width: 680px; }
+.event-card-top { margin-bottom: 10px; }
+.event-tag {
+  display: inline-block; background: rgba(19,164,236,0.1);
+  border: 1px solid rgba(19,164,236,0.2); color: var(--primary);
+  font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.meta-chip {
+  background: var(--glass); border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 20px; font-size: 12px; color: var(--muted);
+}
+.enroll-btn { width: 100%; margin-top: 14px; justify-content: center; padding: 11px; }
+.loading-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.skeleton { height: 200px; background: linear-gradient(90deg, var(--card) 25%, var(--card2) 50%, var(--card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 14px; }
+@keyframes shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
 /* Admin login */
 .admin-login {
   display: flex; justify-content: center; align-items: center; min-height: 70vh;

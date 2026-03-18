@@ -2,23 +2,20 @@ import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import { motion } from 'framer-motion'
 
-type Participant = { id: string; name: string; email: string; event: string }
 type Event = { id: string; name: string; description: string; location: string; event_date: string; attendees: number }
 
 export default function Participants() {
-  const [participants, setParticipants] = useState<Participant[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [form, setForm] = useState({ name: '', email: '', event: '' })
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { fetchAll() }, [])
+  useEffect(() => { fetchEvents() }, [])
 
-  async function fetchAll() {
+  async function fetchEvents() {
     setLoading(true)
-    const [evRes, parRes] = await Promise.all([fetch('/api/events'), fetch('/api/participants')])
-    if (evRes.ok) setEvents(await evRes.json())
-    if (parRes.ok) setParticipants(await parRes.json())
+    const res = await fetch('/api/events')
+    if (res.ok) setEvents(await res.json())
     setLoading(false)
   }
 
@@ -29,7 +26,9 @@ export default function Participants() {
 
   const handleEnrollClick = (eventName: string) => {
     setForm(f => ({ ...f, event: eventName }))
-    document.getElementById('enroll-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setTimeout(() => {
+      document.getElementById('enroll-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
   }
 
   const enroll = async (e: React.FormEvent) => {
@@ -41,10 +40,10 @@ export default function Participants() {
       body: JSON.stringify(form),
     })
     if (res.ok) {
-      await res.json()
       setForm({ name: '', email: '', event: '' })
-      setSuccess(`You're enrolled in ${form.event}!`)
-      setTimeout(() => setSuccess(''), 3000)
+      setSuccess(`🎉 You're enrolled in "${form.event}"! See you there.`)
+      setTimeout(() => setSuccess(''), 4000)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } else {
       const { error } = await res.json()
       alert(error || 'Enrollment failed')
@@ -55,69 +54,103 @@ export default function Participants() {
     <div className="page">
       <Header />
       <main className="container">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
 
-          {success && (
-            <motion.div className="toast success" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-              ✅ {success}
-            </motion.div>
-          )}
+        {success && (
+          <motion.div className="toast success" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+            {success}
+          </motion.div>
+        )}
 
-          <div className="page-hero">
-            <h1 className="gradient-text">Find Your Event</h1>
-            <p className="muted big-subtext">Browse events and enroll in seconds.</p>
-          </div>
-
-          <h2 className="section-title">Available Events</h2>
-          {loading ? <p className="muted">Loading events...</p> : events.length === 0 ? (
-            <div className="empty-state"><p>No events available yet. Check back soon!</p></div>
-          ) : (
-            <div className="event-cards">
-              {events.map(ev => (
-                <motion.div key={ev.id} className="event-card" whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-                  <div className="event-card-header">
-                    <h3 className="event-card-title">{ev.name}</h3>
-                  </div>
-                  {ev.description && <p className="event-desc">{ev.description}</p>}
-                  <div className="event-meta">
-                    {ev.event_date && <span className="muted small">📅 {ev.event_date}</span>}
-                    {ev.location && <span className="muted small">📍 {ev.location}</span>}
-                  </div>
-                  <button className="btn btn-primary mt-2" onClick={() => handleEnrollClick(ev.name)}>
-                    Enroll Now
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          <div className="enroll-section" id="enroll-form">
-            <h2 className="section-title">Enroll as Participant</h2>
-            <form className="create-form enroll-form" onSubmit={enroll}>
-              <div className="form-grid">
-                <div className="form-row">
-                  <label>Your Name</label>
-                  <input name="name" value={form.name} onChange={handleChange} placeholder="Full name" required />
-                </div>
-                <div className="form-row">
-                  <label>Email</label>
-                  <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@email.com" required />
-                </div>
-                <div className="form-row full-width">
-                  <label>Select Event</label>
-                  <select name="event" value={form.event} onChange={handleChange} required>
-                    <option value="">Choose an event...</option>
-                    {events.map(e => <option key={e.id} value={e.name}>{e.name}{e.event_date ? ` — ${e.event_date}` : ''}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div className="form-actions">
-                <button className="btn btn-primary" type="submit">Confirm Enrollment</button>
-              </div>
-            </form>
-          </div>
-
+        {/* Hero */}
+        <motion.div className="explore-hero" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <h1 className="gradient-text">Explore Events</h1>
+          <p className="muted big-subtext">Discover hackathons, workshops, and competitions. Find your next challenge.</p>
         </motion.div>
+
+        {/* Events Grid */}
+        <div className="section-header">
+          <h2>Available Events</h2>
+          <span className="badge">{events.length}</span>
+        </div>
+
+        {loading ? (
+          <div className="loading-grid">
+            {[1,2,3].map(i => <div key={i} className="event-card skeleton" />)}
+          </div>
+        ) : events.length === 0 ? (
+          <div className="empty-state">
+            <p>🗓 No events available yet. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="event-cards">
+            {events.map((ev, i) => (
+              <motion.div
+                key={ev.id}
+                className="event-card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                whileHover={{ y: -4 }}
+              >
+                <div className="event-card-top">
+                  <div className="event-tag">Event</div>
+                </div>
+                <h3 className="event-card-title">{ev.name}</h3>
+                {ev.description && <p className="event-desc">{ev.description}</p>}
+                <div className="event-meta">
+                  {ev.event_date && <span className="meta-chip">📅 {ev.event_date}</span>}
+                  {ev.location && <span className="meta-chip">📍 {ev.location}</span>}
+                </div>
+                <button className="btn btn-primary enroll-btn" onClick={() => handleEnrollClick(ev.name)}>
+                  Enroll Now →
+                </button>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* Enroll Form */}
+        <motion.div
+          id="enroll-form"
+          className="enroll-section"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="enroll-header">
+            <h2>Enroll as Participant</h2>
+            <p className="muted">Fill in your details below to secure your spot.</p>
+          </div>
+          <form className="create-form enroll-form" onSubmit={enroll}>
+            <div className="form-grid">
+              <div className="form-row">
+                <label>Your Name</label>
+                <input name="name" value={form.name} onChange={handleChange} placeholder="Full name" required />
+              </div>
+              <div className="form-row">
+                <label>Email Address</label>
+                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@email.com" required />
+              </div>
+              <div className="form-row full-width">
+                <label>Select Event</label>
+                <select name="event" value={form.event} onChange={handleChange} required>
+                  <option value="">Choose an event...</option>
+                  {events.map(e => (
+                    <option key={e.id} value={e.name}>
+                      {e.name}{e.event_date ? ` — ${e.event_date}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="form-actions">
+              <button className="btn btn-primary" type="submit" style={{ padding: '12px 28px', fontSize: '15px' }}>
+                Confirm Enrollment
+              </button>
+            </div>
+          </form>
+        </motion.div>
+
       </main>
     </div>
   )
