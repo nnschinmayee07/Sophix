@@ -1,0 +1,1 @@
+# Sophix - Event MVP (Local)\n\nSee README in repo root for instructions.\n
