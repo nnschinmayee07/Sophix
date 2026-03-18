@@ -10,7 +10,11 @@ export default function Dashboard() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { fetchEvents() }, [])
+  useEffect(() => {
+    fetchEvents()
+    const interval = setInterval(fetchEvents, 10000) // refresh every 10s
+    return () => clearInterval(interval)
+  }, [])
 
   async function fetchEvents() {
     setLoading(true)
