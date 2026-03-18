@@ -15,9 +15,11 @@ export default function Header(){ const router = useRouter()
       <div className="brand">Sophix<span className="accent">.</span></div>
       <nav className="main-nav" role="navigation" aria-label="Main">
         {links.map(l => (
-          <motion.span key={l.href} className={`nav-item ${router.pathname===l.href?'active':''}`} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-            <Link legacyBehavior href={l.href}><a className="nav-link">{l.label}</a></Link>
-          </motion.span>
+          <span key={l.href} className={`nav-item ${router.pathname===l.href?'active':''}`}>
+            <motion.span whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} style={{ display: 'inline-block' }}>
+              <Link legacyBehavior href={l.href}><a className="nav-link">{l.label}</a></Link>
+            </motion.span>
+          </span>
         ))}
       </nav>
     </header>
