@@ -217,6 +217,16 @@ body {
 .cta-buttons .btn { padding: 12px 24px; font-size: 15px; }
 .hero-img { max-width: 420px; width: 100%; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
 
+/* Features grid */
+.features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.feature-card {
+  background: var(--card); border: 1px solid var(--border);
+  padding: 24px; border-radius: 16px; transition: border-color 0.2s;
+}
+.feature-card:hover { border-color: rgba(139,92,246,0.3); }
+.feature-icon { font-size: 32px; margin-bottom: 12px; }
+.feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+
 /* Features / Community */
 .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 20px; }
 .glass-card {
